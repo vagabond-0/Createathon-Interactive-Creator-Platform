@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -89,10 +90,10 @@ const Login = () => {
           Login
         </button>
         <p>
-          <span>Not registered yet?</span>
-          <a href="/register" className="text-blue-600">
+          <span>Not registered yet? </span>
+          <Link href="/register" className="text-blue-600">
             click here
-          </a>
+          </Link>
         </p>
       </div>
 

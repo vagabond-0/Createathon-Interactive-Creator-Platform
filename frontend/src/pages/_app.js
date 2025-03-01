@@ -1,3 +1,4 @@
+import Navbar from "@/Components/Home/Navbar";
 import "@/styles/globals.css";
 
 

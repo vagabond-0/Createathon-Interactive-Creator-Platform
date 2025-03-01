@@ -1,47 +1,71 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
-import { useEffect, useState } from "react";
-import Login from "./Login";
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import axios from 'axios';
+import Challenge from '@/Components/Home/Challenge';
+import Navbar from '@/Components/Home/Navbar';
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const Home = () => {
+  const [challenges, setChallenges] = useState([]);
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState(null); 
+  const router = useRouter();
 
-export default function Home() {
-  const [isauthenicated, setisauthenicated] = useState(false);
-  const [loading, setloading] = useState(true);
-  
   useEffect(() => {
-    const checkUser = () => {
-      console.log(localStorage.getItem("token"))
-      const accesstoken = localStorage.getItem("token");
-      if (accesstoken) {
-        setisauthenicated(true);
-      } else {
-        setisauthenicated(false);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/Login");
+      return;
+    }
+
+    const getAllChallenges = async () => {
+      try {
+        const response = await axios.get(
+          "http://127.0.0.1:8000/challenge/getallchallenge/",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        
+        console.log(response.data);
+
+        setChallenges(response.data); 
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching challenges:", error);
+        setError("Failed to fetch challenges. Please try again.");
+        setLoading(false);
       }
     };
 
-    checkUser();
-    setloading(false);
-  }, []);
+    getAllChallenges();
+  }, [router]);
 
   if (loading) {
-    return <div>Loading...</div>; 
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
   }
 
   return (
-    <div>
-       {isauthenicated ? (
-        <div></div>
-      ) : (
-        <Login />
-      )}
-    </div>
+    <>
+      {router.pathname !== "/logout" && <Navbar />}
+      <div className="h-fit w-screen text-mono">
+        <div>
+          {challenges.length === 0 ? (
+            <p>No challenges available</p>
+          ) : (
+          <div>
+              <Challenge challenges={challenges}/>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
-}
+};
+
+export default Home;
